@@ -6,13 +6,17 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dr": "node export_daily.js"
+    "ptt": "node protobufToTstype.js",
+    "dr": "node export_daily.js",
+    "w2md": "node word2md.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
     "glob": "^8.0.3",
     "moment": "^2.29.4",
+    "pandoc": "^0.2.0",
     "xlsx": "^0.18.5"
   }
 }

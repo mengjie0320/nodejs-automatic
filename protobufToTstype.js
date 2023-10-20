@@ -17,6 +17,14 @@ const typeArr = [
     value: ': number',
   },
   {
+    type: 'int32 ',
+    value: ': number',
+  },
+  {
+    type: 'int64 ',
+    value: ': number',
+  },
+  {
     type: 'string ',
     value: ': string',
   },
@@ -51,6 +59,7 @@ for (const file of files) {
           break;
         }
         let paramText = arr[j];
+        console.log('paramText', paramText);
         // 是否数组 
         let isRepeat = paramText.indexOf('repeated ') !== -1;
         paramText = paramText.replace('repeated ', '');
@@ -62,14 +71,17 @@ for (const file of files) {
           }
         })
         // 以其他为基础类型
-        if (paramText.indexOf(': ') === -1) {
-          let mR = paramText.match(/[A-Z][A-Za-z0-9]{1,}[\s]/)[0], mRt = mR.split(' ')[0];
+        console.log(paramText, paramText.indexOf(': '));
+        if (paramText.indexOf(': ') === -1 && paramText.match(/[A-Z][A-Za-z0-9]{1,}[\s]/)) {
+          console.log('paramText.match(/[A-Z][A-Za-z0-9]{1,}[\s]/)', paramText.match(/[A-Z][A-Za-z0-9]{1,}[\s]/));
+          console.log('  ');
+          let mR = paramText.match(/[A-Z][A-Za-z0-9]{1,}[\s]/)[0], mRt = mR ? mR.split(' ')[0]: '';
           paramText = paramText.replace(mR, '');
           paramText = paramText.replace(/[\s]*[=][\s+\]*[0-9]{1,}/, isRepeat ? `: Array<${mRt}>` : `: ${mRt}`);
         }
         // 替换大小写
         // resArr.push(paramText.match);
-        if (paramText.indexOf('_') !== -1) {
+        if (paramText.indexOf('_') !== -1 && paramText.match(/[_][a-z0-9]/)) {
           let mR = paramText.match(/[_][a-z0-9]/)[0], mRt = mR.split('_')[1];
           paramText = paramText.replace(mR, mRt.toUpperCase());
         }

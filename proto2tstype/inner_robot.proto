@@ -1,0 +1,124 @@
+import "trpc/common/validate.proto";  
+
+service TrpcInnerRobotManageSvr {
+    //添加司内机器人
+    rpc AddInnerRobot(AddInnerRobotReq)returns(AddInnerRobotRsp);
+     //司内机器人列表拉取接口
+     rpc QueryInnerRobotList (QueryInnerRobotListReq) returns (QueryInnerRobotListRsp); 
+     //司内机器人白名单列表接口
+     rpc QueryInnerRobotWhiteList (QueryInnerRobotWhiteListReq) returns (QueryInnerRobotWhiteListRsp); 
+     //司内机器人属性更新接口
+     rpc UpdateInnerRobot (UpdateInnerRobotReq) returns (UpdateInnerRobotRsp); 
+     //获取操作流水
+     rpc GetOpFlow(EventReq)returns(EventRsp);
+} 
+
+enum RobotUpdateType {
+    ROBOT_UPDATE_TYPE_UNKNOWN = 0; //未知
+    ROBOT_UPDATE_TYPE_DELETE_ROBOT = 1; //删除机器人司内标识
+    ROBOT_UPDATE_TYPE_UPDATE_RTX_WHITELIST = 2; //更新rtx白名单
+    ROBOT_UPDATE_TYPE_UPDATE_QQC2C_WHITELIST = 3; //更新qq号码白名单
+    ROBOT_UPDATE_TYPE_UPDATE_QQGROUP_WHITELIST = 4; //更新qq群白名单
+    ROBOT_UPDATE_TYPE_UPDATE_CHANNEL_WHITELIST = 5; // 更新频道白名单
+} 
+
+enum WhiteType {
+    WHITE_TYPE_UNKNOWN = 0;
+    WHITE_TYPE_RTX = 1;
+    WHITE_TYPE_QQC2C = 2;
+    WHITE_TYPE_GROUP = 3;
+    WHITE_TYPE_CHANNEL = 4;
+}
+
+enum RtxStatus {
+    EXCLUDE_RTX = 0; // 没有设置了司内rtx人都可见
+    INCLUDE_RTX = 1; // 设置了司内rtx都可见
+} 
+
+message Event {
+    string rtx = 1; //操作者
+    string opcode = 2; //操作类型
+    int64 op_time = 3;//操作时间
+    Robot robot = 4; //操作机器人
+}
+
+message Robot {
+    string appid = 1 [(validate.rules).string.tsecstr = true]; 
+    string robot_uin = 2 [(validate.rules).string.tsecstr = true]; 
+}
+
+message Where {
+    string key = 1;
+    string op = 2; // eq,neq,like
+    string val = 3;
+}
+
+message Account {
+    string uin = 1;
+}
+
+message AccountPackage {
+    repeated Account account_list = 1; //如果名单数比较少，可以直接用数组上传
+    string file_name = 2;//如果名单数比较大，则可以上传到文件，然后把文件链接放在这里，仅支持txt，每行一个号码
+    string file_content = 3;
+}
+
+message QueryInnerRobotListReq { 
+  	    int32 page = 1; //起始页：0
+  	    int32 limit = 2;
+  	    repeated Where conditions = 3; // and关系
+}
+ 
+message QueryInnerRobotListRsp {
+  	   repeated Robot robot_list = 1;
+  	   int32 total = 2;
+}
+
+message AddInnerRobotReq {
+  	    Robot robot = 1;
+  	    int32 rtx_status = 2; // RtxStatus
+  	    map<int32,AccountPackage> accounts = 3; //key:白名单类型(WhiteType)，val:号码包
+} 
+ 
+message AddInnerRobotRsp { 
+  	   int32 ret_code = 1;
+  	   string ret_msg = 2;
+}
+
+message QueryInnerRobotWhiteListReq { 
+  	   Robot robot = 1;
+  	   int32 page = 2; //起始页：0
+  	   int32 limit = 3;
+  	   int32 white_type = 4; //白名单类型  WhiteType
+  	   repeated Where conditions = 5; // and关系
+}
+
+ 
+message QueryInnerRobotWhiteListRsp { 
+  	   repeated Account account_list = 1;
+  	   int32 total = 2;
+}
+
+message UpdateInnerRobotReq { 
+  	    Robot robot = 1;
+  	    int32 update_type = 2; //更新类型 RobotUpdateType
+  	    int32 rtx_status = 3; // 见RtxStatus
+  	    AccountPackage add_account_list = 4; //添加白名单
+  	    AccountPackage remove_account_list = 5; //删除白名单
+}
+
+message UpdateInnerRobotRsp { 
+  	   int32 ret_code = 1;
+  	   string ret_msg = 2;
+}
+
+message EventReq {
+    Robot robot = 1;
+    int32 page = 2;
+    int32 limit = 3;
+}
+
+message EventRsp {
+    repeated Event event_list = 1;
+    int32 total = 2;
+}
